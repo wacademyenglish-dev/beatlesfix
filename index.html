@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLFFY: Hello, Goodbye (A1)</title>
+    <!-- Fonts: Retro Pop Art / Bold -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700;900&family=Outfit:wght@400;600;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pop: {
+                            yellow: '#facc15', /* Bright Yellow */
+                            red: '#ef4444',    /* Comic Red */
+                            blue: '#3b82f6',   /* Royal Blue */
+                            cream: '#fef3c7',  /* Comic Paper */
+                            dark: '#111827',   /* Deep Black/Navy */
+                            cyan: '#06b6d4',   /* Bright Cyan */
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        display: ['Oswald', 'sans-serif'],
+                        mono: ['"Space Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base & Resets */
+        body { 
+            background-color: #fef3c7; 
+            color: #111827; 
+            overflow: hidden; 
+            font-family: 'Outfit', sans-serif; 
+            user-select: none; 
+            /* Pop Art Halftone Dot Pattern */
+            background-image: radial-gradient(#d97706 1.5px, transparent 1.5px);
+            background-size: 20px 20px;
+        }
+        .allow-select { user-select: text; }
+
+        /* Comic Book Solid Shadows & Borders */
+        .comic-border { border: 3px solid #111827; }
+        .comic-shadow { box-shadow: 4px 4px 0px #111827; }
+        .comic-shadow-sm { box-shadow: 2px 2px 0px #111827; }
+        .comic-shadow-hover:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #111827; }
+        .comic-shadow-active:active { transform: translate(2px, 2px) !important; box-shadow: 1px 1px 0px #111827 !important; }
+
+        /* Record Player Animations */
+        .vinyl-spin { animation: spin 3s linear infinite; }
+        .vinyl-paused { animation-play-state: paused; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Slide Navigation */
+        .slide { display: none; opacity: 0; width: 100%; min-height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 15px; }
+        .slide.active { display: flex; animation: slidePopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .slide::before, .slide::after { content: ''; margin: auto; }
+        .slide > * { flex-shrink: 0; max-width: 100%; z-index: 20; }
+        @keyframes slidePopIn { 
+            from { opacity: 0; transform: scale(0.95) translateY(10px); } 
+            to { opacity: 1; transform: scale(1) translateY(0); } 
+        }
+
+        /* Buttons */
+        .chunky-btn { background: #facc15; transition: all 0.1s; }
+        
+        .mcq-btn { transition: all 0.2s; background: #fff; cursor: pointer; }
+        .mcq-btn:hover { background: #facc15; }
+
+        .lyric-highlight { color: #ef4444; font-weight: 900; cursor: pointer; border-bottom: 3px solid #ef4444; transition: all 0.2s; padding: 0 4px; }
+        .lyric-highlight:hover { background: #ef4444; color: #fff; transform: scale(1.05); display: inline-block; }
+
+        /* Comic Panels (Vocab) - Adjusted for compactness */
+        .comic-panel { background: #fff; transition: all 0.3s; cursor: pointer; display: flex; align-items: center; padding: 10px 15px; gap: 10px; position: relative; overflow: hidden; }
+        .comic-panel::after { content: 'BAM!'; position: absolute; right: -40px; bottom: -40px; font-family: 'Oswald'; font-size: 3rem; color: rgba(239, 68, 68, 0.1); font-style: italic; transform: rotate(-15deg); transition: 0.3s; }
+        .comic-panel:hover::after { right: 5px; bottom: -5px; }
+        .panel-icon { font-size: 2rem; width: 40px; text-align: center; z-index: 2;}
+        .panel-text { font-family: 'Oswald', sans-serif; font-weight: 900; font-size: 1.2rem; text-transform: uppercase; z-index: 2;}
+        .panel-status { margin-left: auto; color: #666; font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: bold; z-index: 2;}
+        .comic-panel.revealed { background: #facc15; }
+        .comic-panel.revealed .panel-status { color: #111827; }
+
+        /* The Opposite Machine (Tuner) */
+        .toggle-switch { width: 100px; height: 40px; background: #111827; border-radius: 20px; position: relative; cursor: pointer; }
+        .toggle-knob { width: 32px; height: 32px; background: #ef4444; border-radius: 50%; position: absolute; left: 4px; top: 4px; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; justify-content: center; }
+        .toggle-switch.active .toggle-knob { transform: translateX(60px); background: #3b82f6; }
+
+        /* Sticker Builder (Sentence Builder) */
+        .tape-blank { display: inline-block; min-width: 50px; height: 28px; border-bottom: 3px dashed #111827; margin: 0 4px; vertical-align: middle; text-align: center; font-family: 'Oswald', sans-serif; font-weight: 900; color: #111827; cursor: pointer; transition: 0.3s; }
+        .tape-blank.filled { background: #facc15; border-bottom-style: solid; padding: 0 8px;}
+        .tape-piece { background: #fff; color: #111827; padding: 6px 12px; cursor: pointer; transition: all 0.2s; font-weight: 900; font-family: 'Oswald', sans-serif; text-transform: uppercase; transform: rotate(-2deg); }
+        .tape-piece:nth-child(even) { transform: rotate(2deg); }
+        .tape-piece:hover { background: #ef4444; color: #fff; transform: translateY(-2px) scale(1.05) rotate(0deg); }
+        .tape-piece.used { opacity: 0; pointer-events: none; transform: scale(0); }
+
+        /* Elevator Buttons */
+        .elevator-btn { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: #fff; transition: all 0.2s; cursor: pointer;}
+        .elevator-btn:hover { transform: scale(1.1); }
+        .elevator-btn:active { transform: scale(0.95); }
+
+        /* Memory Game Cards - Compact */
+        .memory-card { height: 80px; perspective: 1000px; cursor: pointer; width: 100%; }
+        .memory-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; pointer-events: none; }
+        .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+        .memory-card.matched .memory-card-back { background: #3b82f6 !important; color: #fff !important; }
+        .memory-card-front, .memory-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; }
+        .memory-card-front { background: #facc15; font-size: 1.5rem; color: #111827; }
+        .memory-card-front::after { content: '?'; font-family: 'Oswald'; font-size: 2rem;}
+        .memory-card-back { background: #fff; color: #111827; transform: rotateY(180deg); font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 1.2rem;}
+
+        .shake { animation: shake 0.4s both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
+
+        .confetti { position: absolute; width: 8px; height: 8px; opacity: 0; z-index: 10000; pointer-events: none; border-radius: 50%; border: 2px solid #111827;}
+        @keyframes fall { 0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+        .hide-scroll::-webkit-scrollbar { display: none; }
+
+        /* Compact Typography */
+        h1.compact-title { font-size: 2.5rem; line-height: 2.5rem; margin-bottom: 1rem; }
+        @media (min-width: 768px) { h1.compact-title { font-size: 3.5rem; line-height: 1; margin-bottom: 1.5rem; } }
+    </style>
+</head>
+<body class="flex flex-col h-screen w-screen relative">
+
+    <!-- ================= MAIN PANEL ================= -->
+    <main class="flex-1 flex flex-col relative z-10 w-full max-w-[1400px] mx-auto p-2 lg:p-4 pb-[100px]">
+        <div class="flex-1 bg-pop-cream comic-border comic-shadow overflow-y-auto hide-scroll flex flex-col allow-select relative" id="slides-container">
+            
+            <!-- WATERMARK -->
+            <div class="absolute bottom-4 right-6 z-0 text-pop-dark/5 font-black font-display text-4xl md:text-6xl tracking-widest pointer-events-none uppercase transform -rotate-6">
+                WOLFFY A1
+            </div>
+
+            <!-- SLIDE 01: INTRO -->
+            <section class="slide active">
+                <div class="flex justify-between items-start mb-4 w-full max-w-4xl mx-auto z-20">
+                    <div class="text-center w-full">
+                        <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 text-xs">VOL. A1 • 1967</div>
+                        <h1 class="text-5xl md:text-7xl font-black font-display leading-none text-pop-dark uppercase transform rotate-1 mb-2">
+                            Hello, <span class="text-pop-red">Goodbye</span>
+                        </h1>
+                        <p class="text-lg md:text-xl text-pop-blue font-black tracking-widest uppercase font-display bg-white inline-block px-3 py-1 comic-border">The Beatles</p>
+                    </div>
+                </div>
+                
+                <div class="py-4 my-2 w-full max-w-3xl mx-auto z-20 bg-white comic-border comic-shadow-sm p-4 text-center transform -rotate-1">
+                    <p class="font-display text-lg md:text-xl text-pop-dark font-black uppercase mb-1">Level: <span class="text-pop-blue">A1 (Beginner)</span></p>
+                    <p class="font-display text-lg md:text-xl text-pop-dark font-black uppercase mb-1">Grammar: <span class="text-pop-red">Opposites & "I/You Say"</span></p>
+                    <p class="font-display text-lg md:text-xl text-pop-dark font-black uppercase">Theme: <span class="text-pop-yellow">Greetings 👋</span></p>
+                </div>
+
+                <div class="bg-pop-blue p-3 comic-border comic-shadow-sm w-full max-w-3xl mx-auto text-center z-20 text-white transform rotate-1 mt-2">
+                    <p class="font-display font-black text-lg mb-1 uppercase tracking-widest">How to play:</p>
+                    <p class="text-sm font-bold">Navigate using the bottom player. <strong class="text-pop-yellow">Double-click</strong> any english word to trigger the Smart Dict!</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 02: COVER ART -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 02 • THE RECORD</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Magical Mystery Tour</h1>
+                <div class="w-full max-w-[280px] comic-border comic-shadow-sm bg-white p-2 flex items-center justify-center z-20 mx-auto transition-transform duration-300 hover:scale-105 aspect-square transform rotate-2">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/e/e8/MagicalMysteryTourDoubleEPcover.jpg" alt="Magical Mystery Tour Cover" class="w-full h-full object-cover comic-border">
+                </div>
+            </section>
+
+            <!-- SLIDE 03: VIBE CHECK -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 03 • WARM UP</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Greeting Check</h1>
+                <p class="text-lg md:text-2xl font-black text-pop-blue mb-6 text-center z-20 font-display uppercase">When you meet someone new, how do you say <span class="bg-pop-yellow px-2 text-pop-dark">Hello</span>?</p>
+                
+                <div class="space-y-3 w-full max-w-2xl mx-auto options-group z-20 font-display" data-correct="any">
+                    <button class="w-full text-left bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-3 md:p-4 text-lg md:text-xl font-black mcq-btn flex items-center gap-4 uppercase text-pop-dark" onclick="selectMCQ(this, 'correct', 'hub-track3')">
+                        <div class="w-10 h-10 bg-pop-red text-white comic-border flex items-center justify-center text-xl shrink-0 rounded-full">🤝</div> I shake hands.
+                    </button>
+                    <button class="w-full text-left bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-3 md:p-4 text-lg md:text-xl font-black mcq-btn flex items-center gap-4 uppercase text-pop-dark" onclick="selectMCQ(this, 'correct', 'hub-track3')">
+                        <div class="w-10 h-10 bg-pop-blue text-white comic-border flex items-center justify-center text-xl shrink-0 rounded-full">🫂</div> I give a hug.
+                    </button>
+                    <button class="w-full text-left bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-3 md:p-4 text-lg md:text-xl font-black mcq-btn flex items-center gap-4 uppercase text-pop-dark" onclick="selectMCQ(this, 'correct', 'hub-track3')">
+                        <div class="w-10 h-10 bg-pop-yellow text-pop-dark comic-border flex items-center justify-center text-xl shrink-0 rounded-full">👋</div> I just wave and say "Hi".
+                    </button>
+                </div>
+                <div class="hidden mt-4 p-3 bg-pop-red text-white comic-border comic-shadow-sm w-full max-w-2xl mx-auto z-20 transform rotate-1" id="hub-track3">
+                    <p class="font-mono text-xs mb-1 uppercase font-bold text-pop-yellow">Speaking Starter</p>
+                    <p class="text-lg md:text-xl font-black font-display uppercase">"When I meet someone, I..."</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 04: THE STORY -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 04 • CONTEXT</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">The Meaning</h1>
+                <div class="bg-white p-6 md:p-8 comic-border comic-shadow-sm text-center relative w-full max-w-3xl mx-auto z-20 transform -rotate-1">
+                    <p class="text-xl md:text-3xl font-black leading-tight text-pop-dark mb-4 font-display uppercase">This song is a fun game of <span class="bg-pop-blue text-white px-2">OPPOSITES</span>.</p>
+                    <p class="text-base md:text-lg text-pop-dark font-bold">Paul McCartney wrote it to show that for everything in life, there is an opposite side. It's a very simple and happy song!</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 05: COMIC VOCABULARY 1 -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 05 • VOCABULARY</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Comic Panels I</h1>
+                <p class="text-base text-pop-dark font-bold mb-4 z-20 text-center">Click the panels to read them.</p>
+                
+                <div class="flex flex-col gap-3 w-full max-w-2xl mx-auto z-20">
+                    <div class="comic-panel comic-border comic-shadow-sm comic-shadow-hover" onclick="revealPanel(this, 'Yes', 'Affirmative. Good.', 'Do you like pizza?', 1)">
+                        <div class="panel-icon">👍</div>
+                        <div class="panel-text text-pop-dark">Word 1</div>
+                        <div class="panel-status">[CLICK TO READ]</div>
+                    </div>
+                    <div class="comic-panel comic-border comic-shadow-sm comic-shadow-hover" onclick="revealPanel(this, 'No', 'Negative. Bad.', 'Do you like mosquitoes?', 1)">
+                        <div class="panel-icon">👎</div>
+                        <div class="panel-text text-pop-dark">Word 2</div>
+                        <div class="panel-status">[CLICK TO READ]</div>
+                    </div>
+                    <div class="comic-panel comic-border comic-shadow-sm comic-shadow-hover" onclick="revealPanel(this, 'Stop', 'Don\'t move. Red light.', 'What do you do at a red light?', 1)">
+                        <div class="panel-icon">🛑</div>
+                        <div class="panel-text text-pop-dark">Word 3</div>
+                        <div class="panel-status">[CLICK TO READ]</div>
+                    </div>
+                    <div class="comic-panel comic-border comic-shadow-sm comic-shadow-hover" onclick="revealPanel(this, 'Go', 'Move. Green light.', 'What do you do at a green light?', 1)">
+                        <div class="panel-icon">🟢</div>
+                        <div class="panel-text text-pop-dark">Word 4</div>
+                        <div class="panel-status">[CLICK TO READ]</div>
+                    </div>
+                </div>
+
+                <div id="panel-info-1" class="hidden mt-4 p-3 bg-white comic-border comic-shadow-sm w-full max-w-2xl mx-auto text-left z-20 transform rotate-1">
+                    <h3 id="p-title-1" class="text-2xl font-black font-display text-pop-red mb-1 uppercase">Word</h3>
+                    <p id="p-def-1" class="text-pop-dark font-bold text-sm mb-1">Definition</p>
+                    <p class="text-pop-blue text-xs font-bold font-mono">> <span id="p-q-1">Question</span></p>
+                </div>
+            </section>
+
+            <!-- SLIDE 06: COMIC VOCABULARY 2 -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 06 • VOCABULARY</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Comic Panels II</h1>
+                <p class="text-base text-pop-dark font-bold mb-4 z-20 text-center">More opposites to discover!</p>
+                
+                <div class="flex flex-col gap-3 w-full max-w-2xl mx-auto z-20">
+                    <div class="comic-panel comic-border comic-shadow-sm comic-shadow-hover" onclick="revealPanel(this, 'High', 'Up in the sky. Tall.', 'Are airplanes high or low?', 2)">
+                        <div class="panel-icon">⬆️</div>
+                        <div class="panel-text text-pop-dark">Word 5</div>
+                        <div class="panel-status">[CLICK TO READ]</div>
+                    </div>
+                    <div class="comic-panel comic-border comic-shadow-sm comic-shadow-hover" onclick="revealPanel(this, 'Low', 'Down near the floor. Short.', 'Is an ant high or low?', 2)">
+                        <div class="panel-icon">⬇️</div>
+                        <div class="panel-text text-pop-dark">Word 6</div>
+                        <div class="panel-status">[CLICK TO READ]</div>
+                    </div>
+                    <div class="comic-panel comic-border comic-shadow-sm comic-shadow-hover" onclick="revealPanel(this, 'Hello', 'A greeting when you arrive.', 'What do you say when you meet someone?', 2)">
+                        <div class="panel-icon">👋</div>
+                        <div class="panel-text text-pop-dark">Word 7</div>
+                        <div class="panel-status">[CLICK TO READ]</div>
+                    </div>
+                    <div class="comic-panel comic-border comic-shadow-sm comic-shadow-hover" onclick="revealPanel(this, 'Goodbye', 'What you say when you leave.', 'What do you say when you go home?', 2)">
+                        <div class="panel-icon">🚶</div>
+                        <div class="panel-text text-pop-dark">Word 8</div>
+                        <div class="panel-status">[CLICK TO READ]</div>
+                    </div>
+                </div>
+
+                <div id="panel-info-2" class="hidden mt-4 p-3 bg-white comic-border comic-shadow-sm w-full max-w-2xl mx-auto text-left z-20 transform -rotate-1">
+                    <h3 id="p-title-2" class="text-2xl font-black font-display text-pop-blue mb-1 uppercase">Word</h3>
+                    <p id="p-def-2" class="text-pop-dark font-bold text-sm mb-1">Definition</p>
+                    <p class="text-pop-red text-xs font-bold font-mono">> <span id="p-q-2">Question</span></p>
+                </div>
+            </section>
+
+            <!-- SLIDE 07: PRE-LISTENING -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 07 • SYSTEM CHECK</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">The Setup</h1>
+                <div class="bg-pop-blue text-white p-6 rounded-xl text-center max-w-3xl w-full relative z-20 comic-border comic-shadow-sm transform rotate-1">
+                    <p class="text-xl md:text-3xl font-black leading-tight mb-4 font-display uppercase">Look at their clothes in the video!</p>
+                    <p class="text-base font-bold bg-white text-pop-dark px-3 py-2 inline-block comic-border transform -rotate-2">They are wearing their famous "Sgt. Pepper" colorful suits.</p>
+                </div>
+            </section>
+
+            <!-- SLIDE 08: THE VIDEO -->
+            <section class="slide h-full w-full">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-2 transform -rotate-2 z-20 text-xs">TRACK 08 • PLAYING</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Official Video</h1>
+                <div class="w-full max-w-3xl mx-auto overflow-hidden comic-border comic-shadow-sm bg-black relative aspect-video z-20">
+                    <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/rblYSKz_VnI?rel=0" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </section>
+
+            <!-- SLIDE 09: LISTENING CHECK -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 09 • QUIZ</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Visual Check</h1>
+                <p class="text-lg md:text-2xl font-black text-pop-red mb-6 text-center z-20 font-display uppercase">What are they wearing in the video?</p>
+                
+                <div class="flex flex-col md:flex-row justify-center gap-4 z-20 w-full max-w-3xl mx-auto options-group">
+                    <button class="w-full md:w-1/2 bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-lg md:text-xl font-black mcq-btn text-pop-dark uppercase font-display" onclick="selectMCQ(this, 'wrong')">
+                        👕 Casual clothes
+                    </button>
+                    <button class="w-full md:w-1/2 bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-lg md:text-xl font-black mcq-btn text-pop-dark uppercase font-display" onclick="selectMCQ(this, 'correct', 'listen-hub')">
+                        🎩 Colorful Suits
+                    </button>
+                </div>
+                <div id="listen-hub" class="hidden mt-6 p-4 bg-pop-yellow text-pop-dark comic-border comic-shadow-sm w-full max-w-3xl mx-auto text-center text-lg font-bold z-20 transform -rotate-1">
+                    > Correct! They look very iconic in those bright suits!
+                </div>
+            </section>
+
+            <!-- SLIDE 10: LYRICS 1 -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 10 • READING</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">The Lyrics I</h1>
+                <p class="text-sm md:text-base font-bold text-pop-blue mb-4 z-20 text-center bg-white inline-block px-3 py-1 comic-border">Click on the red words for Insights!</p>
+                
+                <div class="w-full max-w-2xl mx-auto flex-1 bg-white comic-border comic-shadow-sm p-6 md:p-8 overflow-y-auto text-center z-20 flex flex-col justify-center">
+                    <div class="space-y-4 text-2xl md:text-4xl font-black font-display text-pop-dark leading-tight uppercase">
+                        <p>You say <span class="lyric-highlight" onclick="openLyricInsight('yes')">yes</span></p>
+                        <p>I say <span class="lyric-highlight" onclick="openLyricInsight('no')">no</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 11: LYRICS 2 -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 11 • READING</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">The Lyrics II</h1>
+                <div class="w-full max-w-2xl mx-auto flex-1 bg-white comic-border comic-shadow-sm p-6 md:p-8 overflow-y-auto text-center z-20 flex flex-col justify-center transform rotate-1">
+                    <div class="space-y-4 text-2xl md:text-4xl font-black font-display text-pop-dark leading-tight uppercase">
+                        <p>You say <span class="lyric-highlight" onclick="openLyricInsight('stop')">stop</span></p>
+                        <p>And I say <span class="lyric-highlight" onclick="openLyricInsight('go')">go, go, go</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 12: GRAMMAR INTRO -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 12 • GRAMMAR</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Opposites</h1>
+                <p class="text-base md:text-xl font-bold text-pop-dark mb-6 text-center z-20 bg-white px-3 py-1 comic-border transform rotate-1">Words that have completely different meanings.</p>
+                
+                <div class="bg-pop-yellow p-6 comic-border comic-shadow-sm relative w-full max-w-2xl mx-auto z-20 flex flex-row justify-around items-center gap-4 font-display text-2xl md:text-4xl font-black uppercase text-pop-dark">
+                    <div class="text-center bg-white p-3 comic-border transform -rotate-2 w-full">HOT 🥵</div>
+                    <div class="text-3xl text-pop-red">VS</div>
+                    <div class="text-center bg-white p-3 comic-border transform rotate-2 w-full">COLD 🥶</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 13: THE OPPOSITE MACHINE (AMP SWITCH) -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 13 • INTERACTIVE</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">The Machine</h1>
+                <p class="text-sm md:text-lg font-bold text-pop-dark mb-4 text-center z-20 bg-white inline-block px-3 py-1 comic-border">Use the switch to see the opposite.</p>
+                
+                <div class="bg-white p-6 comic-border comic-shadow-sm w-full max-w-2xl mx-auto z-20 flex flex-col items-center" id="machine-box" style="transition: background 0.5s;">
+                    
+                    <div class="w-full h-24 flex items-center justify-center relative overflow-hidden mb-4">
+                        <!-- Left State -->
+                        <div id="text-left" class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500">
+                            <p class="text-4xl md:text-6xl font-black font-display text-pop-dark uppercase">YES 👍</p>
+                        </div>
+                        <!-- Right State -->
+                        <div id="text-right" class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 opacity-0 scale-50 pointer-events-none">
+                            <p class="text-4xl md:text-6xl font-black font-display text-white uppercase">NO 👎</p>
+                        </div>
+                    </div>
+
+                    <!-- Fader -->
+                    <div class="w-full flex items-center justify-center gap-4 font-bold text-pop-dark font-display text-xl uppercase">
+                        <span>Side A</span>
+                        <div class="toggle-switch comic-border comic-shadow-sm" onclick="toggleOppositeMachine()">
+                            <div id="machine-knob" class="toggle-knob comic-border"></div>
+                        </div>
+                        <span>Side B</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 14: DRILL 1 -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 14 • PRACTICE</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Play The Game</h1>
+                <div class="text-xl md:text-3xl font-black mb-6 bg-pop-red p-6 text-center text-white comic-border comic-shadow-sm w-full max-w-2xl mx-auto z-20 font-display uppercase transform rotate-1">
+                    "If I say Hello, you say <span class="border-b-4 border-white pb-1 px-2">_______</span>."
+                </div>
+                <div class="grid grid-cols-2 gap-4 w-full max-w-2xl mx-auto options-group z-20 font-display">
+                    <button class="bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-xl md:text-2xl font-black text-pop-dark mcq-btn uppercase" onclick="selectMCQ(this, 'wrong')">Hi</button>
+                    <button class="bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-xl md:text-2xl font-black text-pop-dark mcq-btn uppercase" onclick="selectMCQ(this, 'correct', 'hub-dr1')">Goodbye</button>
+                </div>
+                <div class="hidden mt-4 p-3 bg-pop-yellow text-pop-dark comic-border comic-shadow-sm font-bold w-full max-w-2xl mx-auto text-center text-lg z-20 transform -rotate-1" id="hub-dr1">
+                    > "You say goodbye, and I say hello!"
+                </div>
+            </section>
+
+            <!-- SLIDE 15: DRILL 2 -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 15 • PRACTICE</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Play The Game</h1>
+                <div class="text-xl md:text-3xl font-black mb-6 bg-pop-blue p-6 text-center text-white comic-border comic-shadow-sm w-full max-w-2xl mx-auto z-20 font-display uppercase transform -rotate-1">
+                    "If I say Stop, you say <span class="border-b-4 border-white pb-1 px-2">_______</span>."
+                </div>
+                <div class="grid grid-cols-2 gap-4 w-full max-w-2xl mx-auto options-group z-20 font-display">
+                    <button class="bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-xl md:text-2xl font-black text-pop-dark mcq-btn uppercase" onclick="selectMCQ(this, 'correct', 'hub-dr2')">Go</button>
+                    <button class="bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-xl md:text-2xl font-black text-pop-dark mcq-btn uppercase" onclick="selectMCQ(this, 'wrong')">Wait</button>
+                </div>
+                <div id="hub-dr2" class="hidden mt-4 p-3 bg-pop-yellow text-pop-dark comic-border comic-shadow-sm font-bold w-full max-w-2xl mx-auto text-center text-lg z-20 transform rotate-1">
+                    > "You say stop, and I say go, go, go!"
+                </div>
+            </section>
+
+            <!-- SLIDE 16: ELEVATOR MINIGAME -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 16 • MINIGAME</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">The Elevator</h1>
+                <p class="text-base md:text-lg text-pop-dark font-bold mb-4 text-center z-20 bg-white inline-block px-3 py-1 comic-border">Press the buttons to learn High and Low.</p>
+                
+                <div class="bg-white comic-border comic-shadow-sm p-6 flex flex-col items-center gap-4 w-full max-w-sm mx-auto z-20 relative overflow-hidden" id="elevator-box" style="transition: background 0.5s;">
+                    <div id="elev-text" class="text-4xl md:text-5xl font-black font-display uppercase text-pop-dark h-16 flex items-center justify-center transition-all duration-300">FLOOR 0</div>
+                    
+                    <div class="flex gap-6">
+                        <div class="elevator-btn comic-border comic-shadow-sm" onclick="pressElevator('high')">⬆️</div>
+                        <div class="elevator-btn comic-border comic-shadow-sm" onclick="pressElevator('low')">⬇️</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 17: SENTENCE BUILDER -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 17 • STICKERS</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Sticker Builder</h1>
+                <p class="text-sm font-bold text-pop-dark bg-white inline-block px-3 py-1 comic-border mb-4 z-20">> Click the stickers to build the lyric.</p>
+                
+                <div class="bg-pop-cream p-6 comic-border comic-shadow-sm text-center w-full max-w-3xl mx-auto z-20 relative transform rotate-1">
+                    <div class="text-lg md:text-2xl font-black mb-6 text-pop-dark font-display flex flex-wrap justify-center items-center gap-y-3 uppercase">
+                        "<span class="tape-blank" id="t-blank1" onclick="returnTape(1)"></span> 
+                         <span class="tape-blank" id="t-blank2" onclick="returnTape(2)"></span> 
+                         <span class="tape-blank" id="t-blank3" onclick="returnTape(3)"></span> 
+                         AND 
+                         <span class="tape-blank" id="t-blank4" onclick="returnTape(4)"></span> 
+                         <span class="tape-blank" id="t-blank5" onclick="returnTape(5)"></span> 
+                         <span class="tape-blank" id="t-blank6" onclick="returnTape(6)"></span>"
+                    </div>
+                    <div class="flex gap-2 justify-center flex-wrap" id="tape-bank">
+                        <div class="tape-piece comic-border comic-shadow-sm text-sm" onclick="fillTape(this, 'hello')">hello</div>
+                        <div class="tape-piece comic-border comic-shadow-sm text-sm" onclick="fillTape(this, 'You')">You</div>
+                        <div class="tape-piece comic-border comic-shadow-sm text-sm" onclick="fillTape(this, 'say')">say</div>
+                        <div class="tape-piece comic-border comic-shadow-sm text-sm" onclick="fillTape(this, 'say')">say</div>
+                        <div class="tape-piece comic-border comic-shadow-sm text-sm" onclick="fillTape(this, 'I')">I</div>
+                        <div class="tape-piece comic-border comic-shadow-sm text-sm" onclick="fillTape(this, 'goodbye')">goodbye</div>
+                    </div>
+                </div>
+                <div id="tape-hub" class="hidden mt-4 p-3 bg-pop-blue text-white comic-border comic-shadow-sm font-bold text-lg w-full max-w-3xl mx-auto text-center z-20 transform -rotate-1 uppercase font-display">
+                    > BAM! "You say goodbye and I say hello!"
+                </div>
+            </section>
+
+            <!-- SLIDE 18: MEMORY MATCH (Emoji Match A1) -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 18 • MINIGAME</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Emoji Match</h1>
+                <p class="text-base font-bold text-pop-dark bg-white inline-block px-3 py-1 comic-border mb-4 z-20">Match the English word to the Emoji.</p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 w-full max-w-2xl mx-auto z-20" id="mem-grid">
+                    <!-- JS injected -->
+                </div>
+                <div id="mem-hub" class="hidden mt-4 p-3 bg-pop-red text-white font-black w-full max-w-2xl mx-auto text-center text-xl comic-border comic-shadow-sm z-20 font-display uppercase transform rotate-1">
+                    Perfect Memory!
+                </div>
+            </section>
+
+            <!-- SLIDE 19: GRAMMAR 2 -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 19 • GRAMMAR</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">I Say vs You Say</h1>
+                <p class="text-base md:text-lg font-bold text-pop-dark bg-white inline-block px-3 py-1 comic-border mb-6 z-20">Talking about yourself and the other person.</p>
+                
+                <div class="flex flex-col md:flex-row gap-4 w-full max-w-2xl mx-auto z-20">
+                    <div class="bg-white comic-border comic-shadow-sm p-6 flex-1 text-center transform -rotate-2">
+                        <div class="text-5xl mb-3">🙋‍♂️</div>
+                        <p class="text-3xl font-black text-pop-blue font-display uppercase">I SAY</p>
+                        <p class="text-base font-bold mt-1 text-pop-dark">(Me)</p>
+                    </div>
+                    <div class="bg-white comic-border comic-shadow-sm p-6 flex-1 text-center transform rotate-2">
+                        <div class="text-5xl mb-3">🫵</div>
+                        <p class="text-3xl font-black text-pop-red font-display uppercase">YOU SAY</p>
+                        <p class="text-base font-bold mt-1 text-pop-dark">(You)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 20: DRILL 3 -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 20 • PRACTICE</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Who says it?</h1>
+                <div class="text-xl md:text-3xl font-black mb-6 bg-pop-yellow p-6 md:p-8 text-center text-pop-dark comic-border comic-shadow-sm w-full max-w-2xl mx-auto z-20 font-display uppercase transform -rotate-1">
+                    "<span class="border-b-4 border-pop-dark pb-1 px-2">_______</span> say yes, <span class="border-b-4 border-pop-dark pb-1 px-2">_______</span> say no."
+                </div>
+                <div class="space-y-3 w-full max-w-2xl mx-auto options-group z-20 font-display">
+                    <button class="w-full text-center bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-xl font-black mcq-btn uppercase text-pop-dark" onclick="selectMCQ(this, 'wrong')">A) I / You</button>
+                    <button class="w-full text-center bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-xl font-black mcq-btn uppercase text-pop-dark" onclick="selectMCQ(this, 'correct', 'hub-dr3')">B) You / I</button>
+                </div>
+                <div id="hub-dr3" class="hidden mt-4 p-3 bg-pop-blue text-white comic-border comic-shadow-sm font-bold text-lg text-center w-full max-w-2xl mx-auto z-20 transform rotate-1">
+                    > Correct! "You say yes, I say no."
+                </div>
+            </section>
+
+            <!-- SLIDE 21: SCENARIO -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 21 • SCENARIO</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">The Party</h1>
+                <div class="bg-white p-6 rounded-xl text-center w-full max-w-2xl mx-auto z-20 comic-border comic-shadow-sm mb-4 transform rotate-1">
+                    <div class="text-4xl mb-2">🎉</div>
+                    <p class="text-xl font-black text-pop-dark font-display uppercase">You arrive at a party and see your friend.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl mx-auto options-group z-20 font-display">
+                    <button class="bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-lg font-black text-pop-dark mcq-btn uppercase" onclick="selectMCQ(this, 'wrong')">Say: "Goodbye!"</button>
+                    <button class="bg-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active p-4 text-lg font-black text-pop-dark mcq-btn uppercase" onclick="selectMCQ(this, 'correct', 'hub-scen')">Say: "Hello!"</button>
+                </div>
+                <div class="hidden mt-4 p-3 bg-pop-red text-white comic-border comic-shadow-sm font-bold text-lg w-full max-w-2xl mx-auto text-center z-20 transform -rotate-1" id="hub-scen">
+                    > Correct! Hello is for arriving.
+                </div>
+            </section>
+
+            <!-- SLIDE 22: ODD ONE OUT -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 22 • MINIGAME</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Odd One Out</h1>
+                <p class="text-lg font-bold text-pop-dark bg-white inline-block px-3 py-1 comic-border mb-4 z-20">Which word is <strong class="text-pop-red">NOT</strong> a greeting/saying?</p>
+                <div class="grid grid-cols-2 gap-3 w-full max-w-xl mx-auto relative z-20 font-display">
+                    <button onclick="oddCheck(this, false)" class="bg-white p-5 font-black text-xl md:text-2xl comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active mcq-btn text-pop-dark uppercase">Hello</button>
+                    <button onclick="oddCheck(this, false)" class="bg-white p-5 font-black text-xl md:text-2xl comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active mcq-btn text-pop-dark uppercase">Hi</button>
+                    <button onclick="oddCheck(this, true)" class="bg-white p-5 font-black text-xl md:text-2xl comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active mcq-btn text-pop-dark uppercase">Apple</button>
+                    <button onclick="oddCheck(this, false)" class="bg-white p-5 font-black text-xl md:text-2xl comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active mcq-btn text-pop-dark uppercase">Goodbye</button>
+                </div>
+                <div id="odd-hub" class="hidden mt-6 p-3 bg-pop-blue text-white comic-border comic-shadow-sm font-bold text-lg text-center w-full max-w-xl mx-auto z-20 transform rotate-1">> Correct! "Apple" is a fruit 🍎.</div>
+            </section>
+
+            <!-- SLIDE 23: BAMBOOZLE -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 23 • RAPID FIRE</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Bamboozle Mode</h1>
+                <p class="text-lg font-bold text-pop-dark bg-white inline-block px-3 py-1 comic-border mb-4 z-20">Answer 2 consecutive True/False questions.</p>
+                
+                <div id="rq1" class="bg-white comic-border comic-shadow-sm p-6 text-center w-full max-w-2xl z-20 mx-auto transition-all transform -rotate-1">
+                    <p class="font-black text-xl md:text-2xl mb-6 text-pop-dark font-display uppercase">"High" and "Low" are opposites.</p>
+                    <div class="flex gap-4 justify-center font-display">
+                        <button onclick="rqCheck(1, true)" class="w-28 bg-pop-blue comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active text-white py-2 font-black text-xl uppercase">True</button>
+                        <button onclick="rqCheck(1, false)" class="w-28 bg-pop-red comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active text-white py-2 font-black text-xl uppercase">False</button>
+                    </div>
+                </div>
+                <div id="rq2" class="hidden bg-white comic-border comic-shadow-sm p-6 text-center w-full max-w-2xl z-20 mx-auto transition-all transform rotate-1">
+                    <p class="font-black text-xl md:text-2xl mb-6 text-pop-dark font-display uppercase">"Yes" is the opposite of "Go".</p>
+                    <div class="flex gap-4 justify-center font-display">
+                        <button onclick="rqCheck(2, false)" class="w-28 bg-pop-blue comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active text-white py-2 font-black text-xl uppercase">True</button>
+                        <button onclick="rqCheck(2, true)" class="w-28 bg-pop-red comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active text-white py-2 font-black text-xl uppercase">False</button>
+                    </div>
+                </div>
+                <div id="rq-hub" class="hidden mt-6 font-black text-3xl text-pop-red z-20 text-center comic-shadow-sm bg-white inline-block px-4 py-2 comic-border font-display uppercase transform -rotate-2">🏆 POP MASTER!</div>
+            </section>
+
+            <!-- SLIDE 24: SPEAKING -->
+            <section class="slide">
+                <div class="bg-pop-dark text-white font-mono font-bold px-3 py-1 inline-block mb-3 transform -rotate-2 z-20 text-xs">TRACK 24 • SPEAKING</div>
+                <h1 class="compact-title font-black font-display text-pop-dark z-20 text-center uppercase">Vocal Booth</h1>
+                
+                <div class="flex flex-col md:flex-row gap-4 items-stretch w-full max-w-2xl z-20">
+                    <div class="flex-1 bg-white p-6 comic-border comic-shadow-sm flex flex-col items-center justify-center text-center relative transition-colors duration-500 transform rotate-1" id="record-panel1">
+                        <span class="text-xs font-black uppercase tracking-[0.2em] text-pop-dark mb-3 font-mono"><i class="fa-solid fa-eye mr-2"></i> Read this out loud:</span>
+                        
+                        <div class="bg-pop-cream p-4 w-full mb-4 comic-border">
+                            <p class="text-xl md:text-2xl font-black text-pop-dark font-display uppercase">"You say <span class="text-pop-red">goodbye</span>, and I say <span class="text-pop-blue">hello</span>."</p>
+                        </div>
+                        
+                        <button id="record-btn1" onclick="startRecord(1)" class="w-16 h-16 rounded-full bg-pop-yellow text-pop-dark flex items-center justify-center text-2xl comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active mb-2">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        <span id="record-text1" class="text-xs font-bold text-pop-dark font-mono uppercase">Click to record</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 25: REVIEW & END -->
+            <section class="slide">
+                <div class="text-center z-20 flex flex-col items-center">
+                    <div class="w-28 h-28 md:w-36 md:h-36 bg-white rounded-full flex items-center justify-center comic-border comic-shadow-sm mb-4 transform -rotate-3 overflow-hidden p-1">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/e/e8/MagicalMysteryTourDoubleEPcover.jpg" class="w-full h-full object-cover rounded-full">
+                    </div>
+                    <h1 class="compact-title font-black font-display text-pop-dark mb-2 uppercase bg-white px-4 py-1 comic-border comic-shadow-sm transform rotate-2">Mission Complete</h1>
+                    <p class="text-base md:text-lg font-bold text-pop-dark mb-6 bg-white px-3 py-1 comic-border transform -rotate-1">You mastered the opposites! Goodbye! 👋</p>
+                    <button onclick="goToSlide(0)" class="bg-pop-blue text-white font-black font-display text-xl px-10 py-3 comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active uppercase">Restart</button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ================= FIXED BOTTOM DASHBOARD ================= -->
+    <footer class="fixed bottom-0 left-0 w-full h-[90px] lg:h-[110px] bg-white border-t-4 border-pop-dark z-50 flex items-center justify-between px-3 lg:px-8">
+        
+        <!-- Left: Mini Turntable & LCD -->
+        <div class="flex items-center gap-3 lg:gap-6 w-1/3">
+            <div class="relative w-12 h-12 lg:w-16 lg:h-16 shrink-0">
+                <div id="vinyl-record" class="absolute inset-0 rounded-full bg-pop-dark comic-border flex items-center justify-center overflow-hidden vinyl-spin shadow-md">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/e/e8/MagicalMysteryTourDoubleEPcover.jpg" class="w-full h-full object-cover opacity-90">
+                </div>
+            </div>
+            <div class="hidden lg:flex flex-col justify-center bg-pop-cream comic-border rounded px-3 py-2 w-40">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-pop-dark font-mono text-[10px] font-bold tracking-widest uppercase" id="lcd-text">TRK 01</span>
+                    <span class="text-pop-dark text-[9px] font-mono font-bold" id="lcd-time">0:00</span>
+                </div>
+                <div class="w-full bg-pop-dark h-2 rounded-full overflow-hidden border border-pop-dark">
+                    <div id="lcd-progress" class="h-full bg-pop-red w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Playback Controls -->
+        <div class="flex flex-col items-center justify-center gap-1 w-1/3">
+            <div class="flex items-center gap-3 lg:gap-6">
+                <button onclick="prevSlide()" id="btn-prev" class="bg-pop-yellow comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center text-pop-dark disabled:opacity-50">
+                    <i class="fa-solid fa-backward-step text-sm lg:text-base"></i>
+                </button>
+                
+                <button onclick="togglePlayPause()" class="bg-pop-red text-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active w-12 h-12 lg:w-14 lg:h-14 flex items-center justify-center">
+                    <i id="icon-play" class="fa-solid fa-play ml-1 hidden text-xl"></i>
+                    <i id="icon-pause" class="fa-solid fa-pause text-xl"></i>
+                </button>
+
+                <button onclick="nextSlide()" id="btn-next" class="bg-pop-yellow comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center text-pop-dark disabled:opacity-50">
+                    <i class="fa-solid fa-forward-step text-sm lg:text-base"></i>
+                </button>
+            </div>
+            <span class="text-[8px] lg:text-[10px] text-pop-dark tracking-widest uppercase font-bold font-mono mt-1">WOLFFY powered by Wolf Labs</span>
+        </div>
+
+        <!-- Right: Tools -->
+        <div class="flex items-center justify-end gap-2 lg:gap-4 w-1/3">
+            <button onclick="toggleWhiteboard()" class="bg-pop-blue text-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center" title="Teacher Terminal">
+                <i class="fa-solid fa-pen-nib text-base lg:text-lg"></i>
+            </button>
+            <button onclick="toggleDictSidebar()" class="bg-pop-blue text-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center" title="Smart Dictionary">
+                <i class="fa-solid fa-book text-base lg:text-lg"></i>
+            </button>
+            <button onclick="toggleFullScreen()" class="bg-pop-dark text-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active w-10 h-10 lg:w-12 lg:h-12 hidden md:flex items-center justify-center" title="Fullscreen">
+                <i class="fa-solid fa-expand text-base lg:text-lg"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- ================= SMART DICT (Right Panel) ================= -->
+    <aside id="dictPanel" class="fixed top-0 right-0 h-full w-full md:w-[400px] bg-pop-cream comic-border text-pop-dark z-[60] transform translate-x-full transition-transform duration-500 flex flex-col shadow-2xl pb-[120px]">
+        <div class="p-4 lg:p-6 border-b-4 border-pop-dark flex justify-between items-center bg-white">
+            <h2 class="text-xl lg:text-2xl font-black font-display text-pop-dark flex items-center gap-3 uppercase transform -rotate-1">
+                <i class="fa-solid fa-book text-pop-red"></i> DICT
+            </h2>
+            <button onclick="toggleDictSidebar(false)" class="text-pop-dark hover:text-pop-red text-xl font-black"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="p-6 flex-1 overflow-y-auto hide-scroll bg-[radial-gradient(#d97706_1.5px,transparent_1.5px)]" style="background-size: 20px 20px;" id="dict-content">
+            <div class="flex flex-col items-center justify-center h-full text-center bg-white p-6 comic-border comic-shadow-sm transform rotate-1">
+                <i class="fa-solid fa-arrow-pointer text-4xl lg:text-5xl mb-4 text-pop-blue"></i>
+                <p class="text-base font-bold">Double-click any english word to translate.</p>
+                <p class="mt-4 text-xs font-mono font-bold">Or type below:</p>
+                <input type="text" class="mt-2 bg-pop-cream comic-border p-2 w-full text-center outline-none focus:border-pop-red text-pop-dark font-mono text-sm font-bold" placeholder="> Type word + Enter" onkeypress="if(event.key === 'Enter') fetchDict(this.value)">
+            </div>
+        </div>
+    </aside>
+
+    <!-- ================= TEACHER TOOLS (Left Panel) ================= -->
+    <aside id="whiteboardPanel" class="fixed top-0 left-0 h-full w-full md:w-[450px] bg-pop-cream comic-border text-pop-dark z-[60] transform -translate-x-full transition-transform duration-500 flex flex-col shadow-2xl pb-[120px]">
+        <div class="p-4 lg:p-6 border-b-4 border-pop-dark flex justify-between items-center bg-white">
+            <h2 class="text-xl lg:text-2xl font-black font-display text-pop-dark uppercase tracking-widest transform rotate-1">Teacher Notes</h2>
+            <button onclick="toggleWhiteboard(false)" class="text-pop-dark hover:text-pop-red text-xl font-black"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="p-4 lg:p-6 border-b-4 border-pop-dark bg-white">
+            <span class="text-xs font-bold text-pop-dark uppercase tracking-widest block mb-3 font-mono">> Praise Drops</span>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="triggerPraise('BAM! 💥', 'Perfect!')" class="bg-pop-red text-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active font-bold py-2 lg:py-3 text-xs lg:text-sm uppercase font-display tracking-widest transform -rotate-1">BAM!</button>
+                <button onclick="triggerPraise('POW! 🚀', 'Awesome!')" class="bg-pop-blue text-white comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active font-bold py-2 lg:py-3 text-xs lg:text-sm uppercase font-display tracking-widest transform rotate-1">POW!</button>
+            </div>
+        </div>
+
+        <div class="flex-1 p-6 bg-[radial-gradient(#d97706_1.5px,transparent_1.5px)]" style="background-size: 20px 20px;">
+            <textarea id="teacher-notepad" class="w-full h-full bg-white comic-border comic-shadow-sm text-pop-dark text-base lg:text-lg font-bold outline-none resize-none leading-relaxed placeholder:text-gray-400 p-4 transform -rotate-1" placeholder="Write notes here..."></textarea>
+        </div>
+    </aside>
+
+    <!-- ================= PRAISE OVERLAY ================= -->
+    <div id="praise-overlay" class="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300 bg-pop-dark/80 backdrop-blur-sm">
+        <div id="praise-card" class="bg-pop-yellow comic-border p-8 md:p-12 text-center transform scale-50 transition-all duration-500 flex flex-col items-center rotate-3 comic-shadow">
+            <h1 id="praise-main" class="text-5xl md:text-7xl font-black font-display text-pop-dark mb-4 tracking-tight uppercase">BAM!</h1>
+            <p id="praise-sub" class="text-base md:text-xl text-white bg-pop-red px-4 py-2 font-bold font-mono uppercase tracking-widest comic-border transform -rotate-2">Perfect!</p>
+        </div>
+    </div>
+
+    <!-- ================= LYRIC INSIGHTS OVERLAY ================= -->
+    <div id="lyric-insight-overlay" class="fixed inset-0 z-[100] flex items-center justify-center bg-pop-dark/90 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 p-4">
+        <div id="lyric-insight-card" class="bg-white comic-border p-6 lg:p-10 max-w-xl w-full transform scale-95 transition-transform duration-300 relative rotate-1 comic-shadow">
+            <button onclick="closeLyricInsight()" class="absolute -top-4 -right-4 text-white bg-pop-red comic-border w-10 h-10 rounded-full flex items-center justify-center font-black hover:scale-110 transition-transform z-10 text-lg comic-shadow-sm">✕</button>
+            
+            <div class="mb-3"><span class="px-2 py-1 bg-pop-yellow comic-border text-[10px] font-bold uppercase tracking-widest text-pop-dark font-mono transform -rotate-2 inline-block">Insight</span></div>
+            <h2 id="insight-title" class="text-3xl lg:text-4xl font-black font-display text-pop-dark mb-3 uppercase">Title</h2>
+            <p id="insight-explanation" class="text-base lg:text-lg text-pop-dark font-bold leading-relaxed mb-6 border-l-4 border-pop-blue pl-3 bg-pop-cream py-2 pr-3 font-sans transform rotate-1">Exp</p>
+            <div class="bg-pop-dark p-6 comic-border transform -rotate-1">
+                <p id="insight-question" class="text-base lg:text-lg font-bold text-pop-yellow mb-4 font-mono">> Question?</p>
+                <div id="insight-options" class="flex flex-col gap-2"></div>
+                <div id="insight-feedback" class="hidden mt-4 text-center text-pop-cyan font-black text-xl animate-pulse font-display uppercase tracking-widest">Great! 👍</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length; 
+        let isPlaying = true;
+        let cardsFlipped = 0;
+
+        function init() { 
+            updateUI(); 
+            setupMem();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide++;
+                slides[currentSlide].classList.add('active');
+                updateUI();
+                if(currentSlide === totalSlides - 1) shootConfetti();
+                scrollToTop();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide--;
+                slides[currentSlide].classList.add('active');
+                updateUI();
+                scrollToTop();
+            }
+        }
+
+        function goToSlide(index) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            updateUI();
+            scrollToTop();
+        }
+
+        function scrollToTop() {
+            const screen = document.getElementById('slides-container');
+            if(screen) screen.scrollTop = 0;
+        }
+
+        function updateUI() {
+            document.getElementById('btn-prev').disabled = currentSlide === 0;
+            document.getElementById('btn-next').disabled = currentSlide === totalSlides - 1;
+            document.getElementById('lcd-text').innerText = `TRK ${(currentSlide + 1).toString().padStart(2, '0')}`;
+            
+            const progress = totalSlides > 1 ? (currentSlide / (totalSlides - 1)) * 100 : 0;
+            document.getElementById('lcd-progress').style.width = `${progress}%`;
+            
+            const totalSecs = 207; 
+            const curSecs = Math.floor((progress / 100) * totalSecs);
+            document.getElementById('lcd-time').innerText = `${Math.floor(curSecs/60)}:${(curSecs%60).toString().padStart(2,'0')}`;
+        }
+
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            document.getElementById('icon-play').classList.toggle('hidden', isPlaying);
+            document.getElementById('icon-pause').classList.toggle('hidden', !isPlaying);
+            const vinyl = document.getElementById('vinyl-record');
+            if(vinyl) vinyl.classList.toggle('vinyl-paused', !isPlaying);
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e=>console.log(e));
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        function toggleWhiteboard(forceState) {
+            const b = document.getElementById('whiteboardPanel');
+            if (forceState === false) b.classList.add('-translate-x-full');
+            else b.classList.toggle('-translate-x-full');
+        }
+
+        function toggleDictSidebar(forceState) {
+            const p = document.getElementById('dictPanel');
+            if (forceState === false) p.classList.add('translate-x-full');
+            else if (forceState === true) p.classList.remove('translate-x-full');
+            else p.classList.toggle('translate-x-full');
+        }
+
+        // Smart Dict
+        document.addEventListener('dblclick', async (e) => {
+            if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const sel = window.getSelection().toString().trim();
+            if(sel && /^[A-Za-z]+$/.test(sel)) fetchDict(sel.toLowerCase());
+        });
+
+        async function fetchDict(word) {
+            if(!word) return;
+            toggleDictSidebar(true);
+            const content = document.getElementById('dict-content');
+            content.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-pop-blue bg-white p-6 comic-border comic-shadow-sm transform rotate-1"><i class="fa-solid fa-spinner fa-spin text-4xl mb-4"></i><p class="font-bold">Searching...</p></div>`;
+            try {
+                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                const data = await res.json();
+                if(data.title) {
+                    content.innerHTML = `<div class="mt-8 text-center bg-white p-6 comic-border comic-shadow-sm transform -rotate-1"><h3 class="text-3xl font-black text-pop-dark font-display uppercase">${word}</h3><p class="text-pop-red mt-2 font-bold">Not found!</p></div><input type="text" class="mt-6 bg-white comic-border p-2 w-full outline-none text-pop-dark font-bold font-mono" placeholder="Search another..." onkeypress="if(event.key === 'Enter') fetchDict(this.value)">`;
+                    return;
+                }
+                const entry = data[0];
+                const def = entry.meanings[0].definitions[0].definition;
+                content.innerHTML = `
+                    <div class="mt-4 bg-white p-6 comic-border comic-shadow-sm transform rotate-1">
+                        <h3 class="text-3xl lg:text-4xl font-black text-pop-blue uppercase font-display">${entry.word}</h3>
+                        <p class="text-gray-500 mt-1 font-mono text-xs font-bold">${entry.meanings[0].partOfSpeech}</p>
+                        <div class="mt-4 p-3 bg-pop-cream comic-border transform -rotate-1"><p class="text-pop-dark text-sm font-bold">${def}</p></div>
+                    </div>
+                    <input type="text" class="mt-6 bg-white comic-border p-2 w-full outline-none text-pop-dark font-bold font-mono" placeholder="Search another..." onkeypress="if(event.key === 'Enter') fetchDict(this.value)">
+                `;
+            } catch(err) { content.innerHTML = `<p class="text-pop-red mt-8 text-center font-bold bg-white p-4 comic-border">Error.</p>`; }
+        }
+
+        // MCQ
+        function selectMCQ(btn, type, hubId) {
+            const group = btn.closest('.options-group');
+            group.querySelectorAll('.mcq-btn').forEach(b => { 
+                b.classList.remove('bg-pop-yellow', 'bg-pop-blue', 'text-white'); 
+                b.classList.add('bg-white', 'text-pop-dark'); 
+            });
+            
+            if(type === 'correct' || type === 'any') { 
+                btn.classList.remove('bg-white', 'text-pop-dark'); 
+                btn.classList.add('bg-pop-yellow', 'text-pop-dark'); 
+                if(hubId) document.getElementById(hubId).classList.remove('hidden'); 
+                shootConfetti(); 
+            }
+            else { btn.classList.add('shake', 'bg-pop-red', 'text-white'); setTimeout(() => btn.classList.remove('shake', 'bg-pop-red', 'text-white'), 400); }
+        }
+
+        // Comic Panels (Vocab)
+        function revealPanel(el, english, def, q, stageId) {
+            if(!el.classList.contains('revealed')) {
+                el.classList.add('revealed');
+                el.querySelector('.panel-text').innerText = english;
+                el.querySelector('.panel-status').innerText = '[READ]';
+            }
+            
+            const infoPanel = document.getElementById('panel-info-' + stageId);
+            if(infoPanel) {
+                infoPanel.classList.remove('hidden');
+                document.getElementById('p-title-' + stageId).innerText = english;
+                document.getElementById('p-def-' + stageId).innerText = def;
+                document.getElementById('p-q-' + stageId).innerText = q;
+            }
+        }
+
+        // Tuner (Opposite Machine)
+        let machineActive = false;
+        function toggleOppositeMachine() {
+            machineActive = !machineActive;
+            const switchEl = document.querySelector('.toggle-switch');
+            const txtLeft = document.getElementById('text-left');
+            const txtRight = document.getElementById('text-right');
+            const box = document.getElementById('machine-box');
+
+            if(machineActive) {
+                switchEl.classList.add('active');
+                box.style.background = '#3b82f6'; 
+                txtLeft.classList.add('opacity-0', 'scale-50', 'pointer-events-none');
+                txtRight.classList.remove('opacity-0', 'scale-50', 'pointer-events-none');
+                shootConfetti();
+            } else {
+                switchEl.classList.remove('active');
+                box.style.background = '#fff'; 
+                txtLeft.classList.remove('opacity-0', 'scale-50', 'pointer-events-none');
+                txtRight.classList.add('opacity-0', 'scale-50', 'pointer-events-none');
+            }
+        }
+
+        // Elevator
+        function pressElevator(dir) {
+            const t = document.getElementById('elev-text');
+            const b = document.getElementById('elevator-box');
+            if(dir === 'high') {
+                t.innerText = "HIGH ⬆️";
+                t.classList.add('text-pop-blue');
+                t.classList.remove('text-pop-red', 'text-pop-dark');
+                b.style.background = '#fef3c7'; 
+                shootConfetti();
+            } else {
+                t.innerText = "LOW ⬇️";
+                t.classList.add('text-pop-red');
+                t.classList.remove('text-pop-blue', 'text-pop-dark');
+                b.style.background = '#fff';
+            }
+        }
+
+        // Sentence Builder
+        let activeB = 1; const expectedT = {1:"You", 2:"say", 3:"goodbye", 4:"I", 5:"say", 6:"hello"};
+        function fillTape(btn, word) {
+            if(activeB > 6) return;
+            
+            let isCorrect = false;
+            if (activeB === 2 || activeB === 5) {
+                if (word.toLowerCase() === 'say') isCorrect = true;
+            } else {
+                if (expectedT[activeB].toLowerCase() === word.toLowerCase()) isCorrect = true;
+            }
+
+            if(isCorrect) {
+                const b = document.getElementById(`t-blank${activeB}`);
+                if(b) { b.innerText = word.toUpperCase(); b.classList.add('filled'); }
+                btn.classList.add('used'); activeB++;
+                if(activeB > 6) { document.getElementById('tape-hub').classList.remove('hidden'); shootConfetti(); }
+            } else { btn.classList.add('shake', 'bg-pop-red', 'text-white'); setTimeout(()=>btn.classList.remove('shake', 'bg-pop-red', 'text-white'),400); }
+        }
+        function returnTape(n) {
+            const b = document.getElementById(`t-blank${n}`); 
+            if(!b) return;
+            const w = b.innerText; if(!w) return;
+            b.innerText = ""; b.classList.remove('filled'); 
+            
+            const pieces = document.querySelectorAll('.tape-piece.used');
+            for(let i=0; i<pieces.length; i++) {
+                if(pieces[i].innerText.toLowerCase() === w.toLowerCase()) {
+                    pieces[i].classList.remove('used');
+                    break;
+                }
+            }
+            activeB = n; document.getElementById('tape-hub').classList.add('hidden');
+        }
+
+        // Memory Match Game
+        function setupMem() {
+            const grid = document.getElementById('mem-grid');
+            if(!grid) return;
+            const data = [{id:1,v:'Hello'},{id:1,v:'👋'},{id:2,v:'Stop'},{id:2,v:'🛑'},{id:3,v:'Go'},{id:3,v:'🟢'},{id:4,v:'I don\'t know'},{id:4,v:'🤷'}].sort(()=>0.5-Math.random());
+            grid.innerHTML = '';
+            data.forEach(d => {
+                const c = document.createElement('div');
+                c.className='memory-card'; c.dataset.id=d.id;
+                c.innerHTML=`<div class="memory-card-inner"><div class="memory-card-front comic-border comic-shadow-sm"></div><div class="memory-card-back comic-border comic-shadow-sm">${d.v}</div></div>`;
+                c.onclick=()=>flip(c);
+                grid.appendChild(c);
+            });
+        }
+        let f1, f2, lock=false, matches=0;
+        function flip(c) {
+            if(lock || c.classList.contains('flipped')) return;
+            c.classList.add('flipped');
+            if(!f1) { f1=c; return; } f2=c; lock=true;
+            if(f1.dataset.id===f2.dataset.id) { 
+                f1.classList.add('matched'); f2.classList.add('matched'); f1=f2=null; lock=false; matches++;
+                if(matches===4) { document.getElementById('mem-hub').classList.remove('hidden'); shootConfetti(); }
+            }
+            else { setTimeout(()=>{f1.classList.remove('flipped'); f2.classList.remove('flipped'); f1=f2=null; lock=false;}, 800); }
+        }
+
+        // Bamboozle
+        function rqCheck(n, c) {
+            if(c) { document.getElementById('rq'+n).classList.add('hidden'); if(n===1) document.getElementById('rq2').classList.remove('hidden'); else { document.getElementById('rq-hub').classList.remove('hidden'); shootConfetti(); } }
+            else { document.getElementById('rq'+n).classList.add('shake', 'border-pop-red'); setTimeout(()=>document.getElementById('rq'+n).classList.remove('shake', 'border-pop-red'),400); }
+        }
+        
+        // Odd One Out
+        function oddCheck(btn, isOdd) {
+            if(isOdd) {
+                btn.classList.add('bg-pop-blue', 'text-white');
+                document.getElementById('odd-hub').classList.remove('hidden');
+                shootConfetti();
+            } else {
+                btn.classList.add('shake', 'bg-pop-red', 'text-white'); setTimeout(()=>btn.classList.remove('shake', 'bg-pop-red', 'text-white'),400);
+            }
+        }
+
+        // Speaking Studio
+        function startRecord(id) {
+            const btn = document.getElementById('record-btn' + id);
+            const txt = document.getElementById('record-text' + id);
+            const panel = document.getElementById('record-panel' + id);
+            
+            btn.classList.add('animate-pulse');
+            btn.classList.replace('text-pop-dark', 'text-white');
+            btn.classList.replace('bg-pop-yellow', 'bg-pop-red');
+            txt.innerText = "RECORDING... (WAIT 3S)";
+            txt.classList.add('text-pop-red');
+
+            setTimeout(() => {
+                btn.classList.remove('animate-pulse', 'bg-pop-red');
+                btn.classList.add('bg-pop-cyan', 'text-pop-dark');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                
+                txt.innerText = "AUDIO SAVED!";
+                txt.classList.remove('text-pop-red');
+                txt.classList.add('text-pop-cyan');
+                
+                panel.classList.add('bg-pop-cyan/20');
+                shootConfetti();
+            }, 3000);
+        }
+
+        // Lyric Insights
+        function openLyricInsight(k) {
+            const data = {
+                'yes': {t:'Yes', e:'An affirmative answer.', q:'Do you like English?', o:['Yes, I do!', 'No.']},
+                'no': {t:'No', e:'A negative answer.', q:'Do you like bad weather?', o:['No, I don\'t.', 'Yes, I do.']},
+                'stop': {t:'Stop', e:'To not move or to finish an action.', q:'What color means STOP in traffic?', o:['Red.', 'Green.']},
+                'go': {t:'Go', e:'To move or start an action.', q:'Are you ready to go?', o:['Yes, let\'s go!', 'No, wait.']}
+            }[k];
+            if(!data) return;
+            document.getElementById('insight-title').innerText=data.t; document.getElementById('insight-explanation').innerText=data.e; document.getElementById('insight-question').innerText=data.q;
+            const con = document.getElementById('insight-options'); con.innerHTML='';
+            data.o.forEach(o => { const b=document.createElement('button'); b.className='bg-white p-2 md:p-3 rounded-lg text-left font-bold text-base md:text-lg text-pop-dark comic-border comic-shadow-sm comic-shadow-hover comic-shadow-active'; b.innerText=o; b.onclick=()=>document.getElementById('insight-feedback').classList.remove('hidden'); con.appendChild(b); });
+            document.getElementById('insight-feedback').classList.add('hidden');
+            const overlay = document.getElementById('lyric-insight-overlay');
+            const card = document.getElementById('lyric-insight-card');
+            overlay.classList.remove('opacity-0','pointer-events-none');
+            setTimeout(() => card.classList.replace('scale-95', 'scale-100'), 50);
+        }
+
+        function closeLyricInsight() { 
+            const overlay = document.getElementById('lyric-insight-overlay');
+            const card = document.getElementById('lyric-insight-card');
+            card.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => overlay.classList.add('opacity-0', 'pointer-events-none'), 200);
+        }
+
+        // Praise Overlay
+        function triggerPraise(main, sub) {
+            toggleWhiteboard(false);
+            const overlay = document.getElementById('praise-overlay');
+            const card = document.getElementById('praise-card');
+            document.getElementById('praise-main').innerText = main;
+            document.getElementById('praise-sub').innerText = sub;
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => card.classList.replace('scale-50', 'scale-100'), 50);
+            shootConfetti();
+            setTimeout(() => { card.classList.replace('scale-100', 'scale-50'); overlay.classList.add('opacity-0', 'pointer-events-none'); }, 2500); 
+        }
+
+        function shootConfetti() {
+            const colors = ['#facc15', '#ef4444', '#3b82f6'];
+            for(let i=0; i<60; i++) {
+                const c = document.createElement('div'); c.className='confetti';
+                c.style.left = Math.random()*100+'vw'; c.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+                c.style.animation = `fall ${Math.random()*3+2}s linear forwards`;
+                document.body.appendChild(c); setTimeout(()=>c.remove(), 4000);
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
